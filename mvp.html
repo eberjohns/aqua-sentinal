@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shikshak | Interactive MVP Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard with a fixed sidebar for navigation. This structure was chosen to deconstruct the dense, linear technical report into thematic, digestible modules (Overview, Database, API, User Flows, AI). This non-linear approach allows stakeholders (developers, PMs, designers) to quickly access the information most relevant to them, enhancing usability and comprehension. For example, a frontend developer can jump directly to the API and User Flow sections without scrolling through backend details. -->
+    <!-- Visualization & Content Choices: 
+        - Project Architecture: Report Info -> System components -> Goal: Organize -> Viz/Presentation Method: HTML/CSS diagram -> Interaction: None -> Justification: Provides a quick, clear visual map of the system without using forbidden SVG/image assets.
+        - Database Schema: Report Info -> SQLAlchemy Models -> Goal: Organize/Inform -> Viz/Presentation Method: Interactive HTML cards -> Interaction: Click to reveal columns and relationships -> Justification: Far more intuitive for non-DBAs to explore the schema than reading Python code.
+        - API Endpoints: Report Info -> API table -> Goal: Inform/Organize -> Viz/Presentation Method: Filterable HTML table -> Interaction: Text input to filter rows -> Justification: Allows users to quickly find specific endpoints and understand the backend's capabilities.
+        - User Flows: Report Info -> UX descriptions -> Goal: Organize/Explain -> Viz/Presentation Method: Stepped visual flowchart using HTML/CSS -> Interaction: Hover to highlight steps -> Justification: Translates narrative user journeys into a clear, sequential visual process.
+        - Technology Stack: Report Info -> Mentioned technologies -> Goal: Inform -> Viz/Presentation Method: Chart.js Doughnut Chart -> Interaction: Hover tooltips -> Justification: A simple, visually engaging way to summarize the core technologies used in the project. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .active-nav {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .db-card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .db-card.open .db-card-details {
+            max-height: 500px;
+        }
+        .flow-step {
+            transition: all 0.3s ease;
+        }
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 400px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: auto;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-white shadow-md p-4 sticky top-0 h-screen">
+            <h1 class="text-2xl font-bold text-blue-600 mb-8">Shikshak Guide</h1>
+            <nav id="main-nav">
+                <ul class="space-y-2">
+                    <li><a href="#overview" class="nav-link flex items-center p-2 rounded-lg text-slate-700 hover:bg-blue-100">📋 Overview</a></li>
+                    <li><a href="#database" class="nav-link flex items-center p-2 rounded-lg text-slate-700 hover:bg-blue-100">🗃️ Database Schema</a></li>
+                    <li><a href="#api" class="nav-link flex items-center p-2 rounded-lg text-slate-700 hover:bg-blue-100">🔌 API Endpoints</a></li>
+                    <li><a href="#flows" class="nav-link flex items-center p-2 rounded-lg text-slate-700 hover:bg-blue-100">🌊 User Flows</a></li>
+                    <li><a href="#ai" class="nav-link flex items-center p-2 rounded-lg text-slate-700 hover:bg-blue-100">🤖 AI Integration</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10 bg-slate-50">
+
+            <!-- Overview Section -->
+            <section id="overview" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">Project Overview</h2>
+                <p class="text-slate-600 mb-6 max-w-3xl">This guide outlines the Minimum Viable Product (MVP) for Shikshak, an AI-powered platform designed to assist teachers by automating assessments, providing deep insights into student learning gaps, and offering actionable performance dashboards.</p>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-semibold mb-4">Core Architecture</h3>
+                    <p class="text-slate-600 mb-6">Shikshak uses a scalable, decoupled architecture. A Next.js frontend communicates with a FastAPI backend via a REST API. The backend manages business logic, database operations (via SQLAlchemy), and integrates with external AI models from Hugging Face.</p>
+                    
+                    <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                        <div class="p-4 bg-blue-100 rounded-lg font-semibold text-blue-800">Next.js Frontend</div>
+                        <div class="text-2xl font-mono text-slate-400">↔</div>
+                        <div class="p-4 bg-green-100 rounded-lg font-semibold text-green-800">FastAPI Backend</div>
+                        <div class="text-2xl font-mono text-slate-400">↔</div>
+                        <div class="flex flex-col space-y-2">
+                            <div class="p-3 bg-purple-100 rounded-lg font-semibold text-purple-800">SQLite Database</div>
+                            <div class="p-3 bg-yellow-100 rounded-lg font-semibold text-yellow-800">Hugging Face AI</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mt-8 mb-4">Technology Stack</h3>
+                    <div class="chart-container">
+                        <canvas id="techStackChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Schema Section -->
+            <section id="database" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">Database Schema Explorer</h2>
+                <p class="text-slate-600 mb-6">Interact with the cards below to explore the database tables and their relationships. The schema is designed using SQLAlchemy to be robust and scalable.</p>
+                <div id="db-schema-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+            
+            <!-- API Endpoints Section -->
+            <section id="api" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">API Endpoint Navigator</h2>
+                <p class="text-slate-600 mb-6">All communication between the frontend and backend is handled via a secure REST API using JWT for authentication. Use the search box to filter endpoints.</p>
+                 <input type="text" id="api-search" placeholder="Search endpoints..." class="w-full max-w-md p-2 border border-slate-300 rounded-lg mb-6 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-100">
+                            <tr>
+                                <th class="p-4 font-semibold">Method</th>
+                                <th class="p-4 font-semibold">Endpoint</th>
+                                <th class="p-4 font-semibold">Description</th>
+                                <th class="p-4 font-semibold">Auth</th>
+                            </tr>
+                        </thead>
+                        <tbody id="api-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- User Flows Section -->
+            <section id="flows" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">Key User Flows</h2>
+                <p class="text-slate-600 mb-6">These flows illustrate the primary user journeys within the Shikshak platform, from exam creation by teachers to performance analysis.</p>
+                <div class="space-y-12">
+                    <!-- Teacher Flow -->
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-blue-700">1. Teacher: Exam Creation</h3>
+                        <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 items-stretch">
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 1:</strong> Select course and click "Create Exam".</div>
+                            <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 2:</strong> Add questions, selecting topic and type (Objective/Subjective).</div>
+                             <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 3:</strong> For subjective questions, add specific grading rules for the AI.</div>
+                             <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 4:</strong> Save the exam and assign to the class.</div>
+                        </div>
+                    </div>
+                    <!-- Student Flow -->
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-green-700">2. Student: Taking an Exam</h3>
+                        <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 items-stretch">
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 1:</strong> Start an assigned exam from their dashboard.</div>
+                            <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 2:</strong> Answer questions one by one, with a progress bar visible.</div>
+                             <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 3:</strong> Submit the completed exam to the backend for auto-grading and AI analysis.</div>
+                        </div>
+                    </div>
+                    <!-- Grading Flow -->
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-purple-700">3. Teacher: AI-Assisted Grading</h3>
+                        <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 items-stretch">
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 1:</strong> Select a student's submission for review.</div>
+                            <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 2:</strong> View student's answer alongside AI's error analysis and feedback.</div>
+                             <div class="flex items-center text-2xl text-slate-400 font-mono">→</div>
+                            <div class="flow-step flex-1 bg-white p-4 rounded-lg shadow-sm border"><strong>Step 3:</strong> Approve the AI's suggestion or override with a final score and feedback.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Integration Section -->
+            <section id="ai" class="content-section">
+                <h2 class="text-3xl font-bold mb-4">AI Integration Deep Dive</h2>
+                <p class="text-slate-600 mb-6">The core of Shikshak's intelligence lies in its integration with a Hugging Face Zero-Shot Classification model for analyzing subjective answers.</p>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-semibold mb-2">Recommended Model</h3>
+                    <p class="font-mono text-blue-600 bg-blue-50 p-2 rounded-md mb-6">facebook/bart-large-mnli</p>
+                    
+                    <h3 class="text-xl font-semibold mb-2">Grading Logic Flow</h3>
+                    <p class="text-slate-600 mb-6">When a student submits a subjective answer, the backend triggers an asynchronous process that classifies the answer without needing a pre-trained model for the specific question.</p>
+
+                    <div class="space-y-4">
+                        <div class="p-4 border-l-4 border-blue-500 bg-slate-100 rounded-r-lg">
+                            <strong class="text-blue-600">1. Context Assembly:</strong> The student's answer and the teacher's grading rules are combined into a single text sequence.
+                        </div>
+                         <div class="p-4 border-l-4 border-green-500 bg-slate-100 rounded-r-lg">
+                            <strong class="text-green-600">2. API Call:</strong> This sequence is sent to the Hugging Face API along with candidate labels: <code class="text-sm">["conceptual error", "interpretational error", "procedural error", "correct"]</code>.
+                        </div>
+                         <div class="p-4 border-l-4 border-purple-500 bg-slate-100 rounded-r-lg">
+                            <strong class="text-purple-600">3. Analysis & Storage:</strong> The model returns scores for each label. The highest-scoring label is identified as the error type, and this analysis is saved to the database, ready for teacher review.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const dbContainer = document.getElementById('db-schema-container');
+            const apiTableBody = document.getElementById('api-table-body');
+            const apiSearch = document.getElementById('api-search');
+
+            const dbSchemaData = {
+                User: {
+                    icon: '👤',
+                    fields: [
+                        { name: 'id', type: 'Integer', key: 'PK' },
+                        { name: 'email', type: 'String', key: 'Unique' },
+                        { name: 'hashed_password', type: 'String' },
+                        { name: 'full_name', type: 'String' },
+                        { name: 'role', type: 'Enum' },
+                    ],
+                    relations: ['courses (1-M)', 'answers (1-M)']
+                },
+                Course: {
+                    icon: '📚',
+                    fields: [
+                        { name: 'id', type: 'Integer', key: 'PK' },
+                        { name: 'name', type: 'String' },
+                        { name: 'teacher_id', type: 'Integer', key: 'FK to User' },
+                    ],
+                    relations: ['teacher (M-1)', 'exams (1-M)', 'topics (1-M)']
+                },
+                Topic: {
+                    icon: '🏷️',
+                    fields: [
+                        { name: 'id', type: 'Integer', key: 'PK' },
+                        { name: 'name', type: 'String' },
+                        { name: 'course_id', type: 'Integer', key: 'FK to Course' },
+                    ],
+                    relations: ['course (M-1)']
+                },
+                 Exam: {
+                    icon: '📝',
+                    fields: [
+                        { name: 'id', type: 'Integer', key: 'PK' },
+                        { name: 'title', type: 'String' },
+                        { name: 'course_id', type: 'Integer', key: 'FK to Course' },
+                    ],
+                    relations: ['course (M-1)', 'questions (1-M)']
+                },
+                 Question: {
+                    icon: '❓',
+                    fields: [
+                        { name: 'id', type: 'Integer', key: 'PK' },
+                        { name: 'exam_id', type: 'Integer', key: 'FK to Exam' },
+                        { name: 'topic_id', type: 'Integer', key: 'FK to Topic' },
+                        { name: 'question_text', type: 'Text' },
+                        { name: 'question_type', type: 'Enum' },
+                        { name: 'options', type: 'Text (JSON)' },
+                        { name: 'correct_option', type: 'String' },
+                        { name: 'grading_rules', type: 'Text' },
+                    ],
+                    relations: ['exam (M-1)', 'answers (1-M)']
+                },
+                 Answer: {
+                    icon: '✔️',
+                    fields: [
+                        { name: 'id', type: 'Integer', key: 'PK' },
+                        { name: 'question_id', type: 'Integer', key: 'FK to Question' },
+                        { name: 'student_id', type: 'Integer', key: 'FK to User' },
+                        { name: 'answer_text', type: 'Text' },
+                        { name: 'score', type: 'Float' },
+                        { name: 'is_correct', type: 'String' },
+                        { name: 'ai_error_analysis', type: 'Enum' },
+                    ],
+                    relations: ['question (M-1)', 'student (M-1)']
+                },
+            };
+
+            const apiData = [
+                { method: 'POST', endpoint: '/token', description: "Login to get JWT token.", auth: 'None' },
+                { method: 'POST', endpoint: '/register', description: "Create a new student or teacher account.", auth: 'None' },
+                { method: 'GET', endpoint: '/users/me', description: "Get profile information of the logged-in user.", auth: 'User' },
+                { method: 'POST', endpoint: '/courses', description: "Teacher: Create a new course.", auth: 'Teacher' },
+                { method: 'GET', endpoint: '/courses', description: "Teacher: Get a list of their courses.", auth: 'Teacher' },
+                { method: 'POST', endpoint: '/courses/{course_id}/exams', description: "Teacher: Create a new exam for a course.", auth: 'Teacher' },
+                { method: 'POST', endpoint: '/exams/{exam_id}/questions', description: "Teacher: Add a question to an exam.", auth: 'Teacher' },
+                { method: 'GET', endpoint: '/student/exams', description: "Student: Get a list of assigned exams.", auth: 'Student' },
+                { method: 'POST', endpoint: '/exams/{exam_id}/submit', description: "Student: Submit their answers for an exam.", auth: 'Student' },
+                { method: 'GET', endpoint: '/teacher/submissions/{exam_id}', description: "Teacher: Get student submissions for an exam.", auth: 'Teacher' },
+                { method: 'POST', endpoint: '/teacher/grade/review', description: "Teacher: Approve or override AI's grading.", auth: 'Teacher' },
+                { method: 'GET', endpoint: '/dashboard/student', description: "Student: Get performance metrics.", auth: 'Student' },
+                { method: 'GET', endpoint: '/dashboard/teacher/{course_id}', description: "Teacher: Get class-level performance metrics.", auth: 'Teacher' },
+            ];
+
+            function renderDBSchema() {
+                dbContainer.innerHTML = Object.entries(dbSchemaData).map(([name, data]) => `
+                    <div class="db-card bg-white rounded-xl shadow-sm border border-slate-200 cursor-pointer">
+                        <div class="p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-3">${data.icon}</span>
+                                <h4 class="text-lg font-semibold">${name}</h4>
+                            </div>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="db-card-details px-4 pb-4 text-sm">
+                            <strong class="block mb-2">Fields:</strong>
+                            <ul class="space-y-1 list-disc list-inside text-slate-600 mb-3">
+                                ${data.fields.map(f => `<li><strong>${f.name}</strong> (${f.type}) ${f.key ? `<span class="text-xs bg-blue-100 text-blue-800 font-medium px-2 py-0.5 rounded-full">${f.key}</span>` : ''}</li>`).join('')}
+                            </ul>
+                            <strong class="block mb-2">Relationships:</strong>
+                             <ul class="space-y-1 list-disc list-inside text-slate-600">
+                                ${data.relations.map(r => `<li>${r}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.db-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        card.classList.toggle('open');
+                        card.querySelector('.transform').classList.toggle('rotate-180');
+                    });
+                });
+            }
+            
+            function renderApiTable(filter = '') {
+                const filteredData = apiData.filter(row => 
+                    row.endpoint.toLowerCase().includes(filter.toLowerCase()) ||
+                    row.description.toLowerCase().includes(filter.toLowerCase())
+                );
+
+                apiTableBody.innerHTML = filteredData.map(row => {
+                    let methodColor = 'bg-slate-200 text-slate-800';
+                    if (row.method === 'POST') methodColor = 'bg-blue-100 text-blue-800';
+                    if (row.method === 'GET') methodColor = 'bg-green-100 text-green-800';
+                    
+                    let authColor = 'bg-slate-200 text-slate-800';
+                     if (row.auth === 'User') authColor = 'bg-yellow-100 text-yellow-800';
+                     if (row.auth === 'Teacher') authColor = 'bg-red-100 text-red-800';
+                     if (row.auth === 'Student') authColor = 'bg-indigo-100 text-indigo-800';
+
+                    return `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50">
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-bold rounded-md ${methodColor}">${row.method}</span></td>
+                        <td class="p-4 font-mono text-sm">${row.endpoint}</td>
+                        <td class="p-4 text-slate-600">${row.description}</td>
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${authColor}">${row.auth}</span></td>
+                    </tr>
+                `}).join('');
+            }
+            
+            function showSection(hash) {
+                const targetId = hash.substring(1) || 'overview';
+                sections.forEach(sec => {
+                    sec.classList.toggle('active', sec.id === targetId);
+                });
+                navLinks.forEach(link => {
+                    link.classList.toggle('active-nav', link.getAttribute('href') === `#${targetId}`);
+                });
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    history.pushState(null, '', e.currentTarget.getAttribute('href'));
+                    showSection(e.currentTarget.getAttribute('href'));
+                });
+            });
+
+            apiSearch.addEventListener('input', (e) => {
+                renderApiTable(e.target.value);
+            });
+            
+            const techStackCtx = document.getElementById('techStackChart').getContext('2d');
+            const techStackChart = new Chart(techStackCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Frontend (Next.js)', 'Backend (FastAPI)', 'Database (SQLite)', 'AI (Hugging Face)'],
+                    datasets: [{
+                        label: 'Tech Stack',
+                        data: [25, 25, 25, 25],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(245, 158, 11, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(245, 158, 11, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: false,
+                        }
+                    }
+                }
+            });
+
+
+            renderDBSchema();
+            renderApiTable();
+            showSection(window.location.hash);
+        });
+    </script>
+</body>
+</html>

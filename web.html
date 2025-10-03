@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shikshak: The AI Co-pilot for Teachers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #1a202c;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .text-gradient {
+            background: -webkit-linear-gradient(45deg, #3b82f6, #1e40af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gemini-btn {
+            background: linear-gradient(45deg, #4f46e5, #818cf8);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="text-center py-20 px-4 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-800">Shikshak: The AI Co-pilot for Teachers</h1>
+            <p class="mt-4 text-xl md:text-2xl font-medium text-gray-500">Less Paperwork, More Teaching.</p>
+        </div>
+    </header>
+
+    <main>
+        <section id="solution" class="py-20 px-4 bg-white">
+            <div class="max-w-5xl mx-auto text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Our Solution: From Grading to Diagnosing</h2>
+                <p class="text-lg text-gray-600 mt-4 max-w-3xl mx-auto">Introducing Shikshak's core: **Insightful AI Grading**. See how it works by analyzing a sample student answer below. This interactive demo shows how our platform identifies the *type* of error, providing deeper insights instantly.</p>
+                
+                <div class="mt-12 text-left bg-gray-800 rounded-xl p-6 shadow-2xl max-w-3xl mx-auto">
+                    <div class="flex items-center pb-4 border-b border-gray-600">
+                        <div class="flex space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <p class="text-center text-gray-400 font-mono text-sm flex-grow">StudentAnswer.txt</p>
+                    </div>
+                    <div class="font-mono text-gray-300 text-sm md:text-base p-4" id="student-answer-container">
+                        <label for="user-question" class="block text-gray-400 mb-1">Question:</label>
+                        <input id="user-question" type="text" class="w-full mb-4 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g., Why do astronauts float in space?">
+                        <label for="user-answer" class="block text-gray-400 mb-1">Student Answer:</label>
+                        <textarea id="user-answer" rows="3" class="w-full p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g., Because there is no gravity in space."></textarea>
+                    </div>
+                    <div id="analysis-result" class="hidden mt-4 p-4 bg-blue-900/50 border border-blue-700 rounded-lg fade-in">
+                        <h4 class="font-bold text-lg text-white" id="analysis-title"></h4>
+                        <p class="text-blue-200 mt-1" id="analysis-explanation"></p>
+                    </div>
+                    <div class="mt-6 flex justify-center">
+                        <button id="analyze-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition duration-300">Run AI Analysis</button>
+                    </div>
+                    <div id="gemini-follow-up-container" class="hidden mt-6 text-center fade-in">
+                         <button id="gemini-follow-up-btn" class="gemini-btn text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition duration-300">✨ Suggest Follow-up Questions</button>
+                         <div id="gemini-follow-up-result" class="mt-4 p-4 text-left text-white bg-gray-900 border border-gray-700 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="aha-moment" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The "Aha!" Moment: Data-Driven Teaching</h2>
+                <p class="text-lg text-gray-600 mt-4 max-w-3xl mx-auto">Shikshak connects the dots across all assignments and tests to reveal powerful trends. The dashboard doesn't just show scores; it shows **patterns**. Click on a topic in the bar chart below to see the breakdown of student errors and discover the key insight.</p>
+
+                <div class="mt-12 grid lg:grid-cols-5 gap-8 items-center">
+                    <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 text-left">Class Performance by Topic</h3>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                         <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Error Breakdown</h3>
+                        <div class="chart-container h-64">
+                            <canvas id="errorChart"></canvas>
+                        </div>
+                        <div id="insight-text" class="mt-6 p-4 bg-gray-100 rounded-lg text-center fade-in min-h-[100px]">
+                            <p class="text-gray-700 font-semibold">Select a topic from the chart to see the insight.</p>
+                        </div>
+                         <div id="gemini-lesson-plan-container" class="hidden mt-4 text-center fade-in">
+                              <button id="gemini-lesson-plan-btn" class="gemini-btn text-white font-bold py-2 px-6 rounded-lg hover:opacity-90 transition duration-300 w-full">✨ Generate 5-Min Lesson Idea</button>
+                              <div id="gemini-lesson-plan-result-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                                   <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full p-6 relative">
+                                       <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+                                       <div id="gemini-lesson-plan-result" class="text-left"></div>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <footer class="text-center py-10 bg-gray-800 text-gray-400">
+        <p class="font-bold text-xl text-white">Shikshak</p>
+        <p>Our vision is to put an AI co-pilot in the hands of every teacher.</p>
+        <p class="mt-4 text-sm">Thank You for exploring our project.</p>
+    </footer>
+
+  <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentTopic = '';
+            let currentErrorType = '';
+            let currentQuestion = '';
+            let currentAnswer = '';
+
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const analysisResult = document.getElementById('analysis-result');
+            const geminiFollowUpContainer = document.getElementById('gemini-follow-up-container');
+            const geminiFollowUpBtn = document.getElementById('gemini-follow-up-btn');
+            const geminiFollowUpResult = document.getElementById('gemini-follow-up-result');
+            
+            const geminiLessonPlanContainer = document.getElementById('gemini-lesson-plan-container');
+            const geminiLessonPlanBtn = document.getElementById('gemini-lesson-plan-btn');
+            const geminiLessonPlanModal = document.getElementById('gemini-lesson-plan-result-modal');
+            const geminiLessonPlanResult = document.getElementById('gemini-lesson-plan-result');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+
+            analyzeBtn.addEventListener('click', async () => {
+                const question = document.getElementById('user-question').value.trim();
+                const answer = document.getElementById('user-answer').value.trim();
+                currentQuestion = question;
+                currentAnswer = answer;
+
+                const analysisTitle = document.getElementById('analysis-title');
+                const analysisExplanation = document.getElementById('analysis-explanation');
+
+                if (!question || !answer) {
+                    analysisResult.classList.remove('hidden');
+                    analysisTitle.textContent = 'Input Error';
+                    analysisExplanation.textContent = 'Please enter both a question and a student\'s answer.';
+                    return;
+                }
+
+                analyzeBtn.textContent = 'Analyzing...';
+                analyzeBtn.disabled = true;
+                analysisResult.classList.add('hidden');
+                geminiFollowUpContainer.classList.add('hidden');
+
+                const prompt = `Analyze the student's answer to the provided question. Categorize the response into one of four types: "Correct", "Conceptual Error", "Procedural Error", or "Interpretational Error". Provide a brief one-sentence explanation for your categorization.
+
+                - **Conceptual Error**: The student misunderstands a fundamental concept or principle.
+                - **Procedural Error**: The student knows the concept but makes a mistake in the steps, calculation, or process.
+                - **Interpretational Error**: The student misreads or misunderstands what the question is asking.
+                - **Correct**: The answer is accurate.
+                
+                Respond ONLY with a valid JSON object in the following format:
+                {
+                  "errorType": "...",
+                  "explanation": "..."
+                }
+
+                Question: "${question}"
+                Student Answer: "${answer}"`;
+
+                analysisResult.classList.remove('hidden');
+                analysisTitle.textContent = '🧠 Analyzing with Gemini...';
+                analysisExplanation.textContent = '';
+                
+                try {
+                    const jsonResponse = await callGeminiAPI(prompt);
+                    const cleanedJson = jsonResponse.replace(/```json\n?|```/g, '');
+                    const result = JSON.parse(cleanedJson);
+
+                    currentErrorType = result.errorType;
+
+                    analysisTitle.textContent = `Analysis Complete: ${result.errorType}`;
+                    analysisExplanation.textContent = result.explanation;
+                    
+                    if (result.errorType !== 'Correct') {
+                        geminiFollowUpContainer.classList.remove('hidden');
+                        geminiFollowUpResult.innerHTML = '';
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    analysisTitle.textContent = 'API Error';
+                    analysisExplanation.textContent = 'Could not get a valid response from the AI. Please check your API key and network connection.';
+                } finally {
+                    analyzeBtn.textContent = 'Run AI Analysis';
+                    analyzeBtn.disabled = false;
+                }
+            });
+
+            geminiFollowUpBtn.addEventListener('click', async () => {
+                const prompt = `A student provided an answer with a "${currentErrorType}". The original question was: "${currentQuestion}". The student's answer was: "${currentAnswer}". 
+                
+                Generate 3 distinct follow-up questions a teacher could ask to guide the student toward correcting their own misunderstanding. Format the response as an HTML unordered list.`;
+                
+                geminiFollowUpResult.innerHTML = getLoadingSpinnerHTML('Generating questions...');
+                const responseHtml = await callGeminiAPI(prompt);
+                
+                // --- FIX APPLIED HERE ---
+                // Clean the response to remove markdown code block fences (e.g., ```html)
+                const cleanedHtml = responseHtml.replace(/^```html\n?|\n?```$/g, '').trim();
+
+                geminiFollowUpResult.innerHTML = `<h4 class="font-bold text-lg text-white">✨ Here are some guiding questions:</h4>` + cleanedHtml;
+            });
+
+            geminiLessonPlanBtn.addEventListener('click', async () => {
+                if (currentTopic) {
+                    geminiLessonPlanModal.classList.remove('hidden');
+                    const prompt = `Generate a creative 5-minute lesson plan idea to re-teach the concept of '${currentTopic}'. The class has shown a high number of conceptual errors in this area. The plan should be engaging for high school students. Format the response as simple HTML with a main header and an ordered list for the steps.`;
+                    
+                    geminiLessonPlanResult.innerHTML = getLoadingSpinnerHTML('Generating lesson idea...');
+                    const responseHtml = await callGeminiAPI(prompt);
+
+                    // --- FIX APPLIED HERE ---
+                    // Also clean this response just in case the model wraps it in markdown
+                    const cleanedHtml = responseHtml.replace(/^```html\n?|\n?```$/g, '').trim();
+
+                    geminiLessonPlanResult.innerHTML = cleanedHtml;
+                }
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                geminiLessonPlanModal.classList.add('hidden');
+            });
+            
+            async function callGeminiAPI(prompt) {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        parts: [{ text: prompt }]
+                    }]
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody.error.message}`);
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            }
+            
+            function getLoadingSpinnerHTML(loadingText) {
+                return `<div class="flex items-center justify-center p-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div><p class="ml-3 text-gray-500">${loadingText}</p></div>`;
+            }
+
+            const performanceData = {
+                labels: ['Algebra', 'Photosynthesis', 'Gravity', 'Newton\'s Laws', 'Poetry'],
+                datasets: [{
+                    label: 'Class Score (%)',
+                    data: [85, 78, 30, 65, 90],
+                    backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(249, 115, 22, 0.7)'],
+                    borderColor: '#ffffff', borderWidth: 2, borderRadius: 5,
+                }]
+            };
+
+            const errorData = {
+                'Algebra': { values: [10, 60, 30], insight: "Most students made procedural errors in solving equations." },
+                'Photosynthesis': { values: [25, 45, 30], insight: "Students confused key steps in the photosynthesis process." },
+                'Gravity': { values: [70, 20, 10], insight: "A significant number of students hold a conceptual misunderstanding about gravity in orbit." },
+                'Newton\'s Laws': { values: [40, 35, 25], insight: "Conceptual misunderstanding of the third law was common." },
+                'Poetry': { values: [5, 15, 80], insight: "Many students misinterpreted the figurative language in the poems." }
+            };
+
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            const performanceChart = new Chart(performanceCtx, {
+                type: 'bar', data: performanceData,
+                options: {
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    scales: { x: { beginAtZero: true, max: 100, grid: { color: 'rgba(200, 200, 200, 0.1)' }, ticks: { color: '#4b5563' } }, y: { grid: { display: false }, ticks: { color: '#1f2937', font: { weight: 'bold' } } } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `Score: ${c.raw}%` } } },
+                    onClick: (e, els) => { if (els.length > 0) updateErrorChartAndInsight(performanceData.labels[els[0].index]); }
+                }
+            });
+
+            const errorCtx = document.getElementById('errorChart').getContext('2d');
+            const errorChart = new Chart(errorCtx, {
+                type: 'doughnut', data: { labels: ['Conceptual', 'Procedural', 'Interpretational'], datasets: [{ data: [33, 33, 34], backgroundColor: ['#ef4444', '#f97316', '#eab308'], borderColor: '#ffffff', borderWidth: 4, }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#4b5563', boxWidth: 15, padding: 15 } } } }
+            });
+            
+            const insightTextElement = document.getElementById('insight-text');
+
+            function updateErrorChartAndInsight(topic) {
+                currentTopic = topic;
+                const data = errorData[topic];
+                if(data) {
+                    errorChart.data.datasets[0].data = data.values;
+                    errorChart.update();
+                    insightTextElement.innerHTML = `<p class="text-gray-800 font-bold text-lg">${topic} Insight:</p><p class="text-gray-600 mt-1">${data.insight}</p>`;
+                    geminiLessonPlanContainer.classList.remove('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
