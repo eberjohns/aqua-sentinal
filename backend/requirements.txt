@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+geoalchemy2
+pydantic
+python-dotenv
+rasterio
+pysheds
+numpy
+requests
+email-validator
+python-multipart
+pandas
+joblib
+scikit-learn

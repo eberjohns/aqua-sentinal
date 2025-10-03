@@ -1,0 +1,6 @@
+/thrissur_dem.tif
+/frontend/node_modules
+/backend/utils/__pycache__
+
+# External, non-package directories
+/notification/
