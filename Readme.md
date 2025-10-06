@@ -92,5 +92,4 @@ To check working of supabase:
 - Then run:
 ```
 ipconfig /flushdns
-ping db.xyiqiwttgfqgnlfmvijo.supabase.co
 ```
