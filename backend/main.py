@@ -4,13 +4,13 @@ import csv
 from datetime import datetime, timedelta, timezone
 from typing import List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../notification'))
-from notification_function import send_email_notification
+from .notification_function import send_email_notification
 
 from . import models, schemas
 from .database import engine, Base, SessionLocal, get_db

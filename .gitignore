@@ -4,3 +4,4 @@
 
 # External, non-package directories
 /notification/
+/.env

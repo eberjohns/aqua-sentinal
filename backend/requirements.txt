@@ -14,3 +14,4 @@ python-multipart
 pandas
 joblib
 scikit-learn
+geoalchemy2[shapely]

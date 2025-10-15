@@ -61,9 +61,10 @@ The application uses a `.env` file for configuration.
 2.  Open the newly created `.env` file and set the `DATABASE_URL` to your PostgreSQL connection string. The database requires the **PostGIS** extension to be enabled for geospatial features.
 
 ### 5. Run the Server
+Run in root folder
 Start the backend server using Uvicorn. The `--reload` flag will automatically restart the server on code changes.
 ```bash
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 ```
 The backend API will be available at `http://127.0.0.1:8000`.
 
