@@ -62,12 +62,6 @@ The application uses a `.env` file for configuration.
 
 3.  Add News API key
 
-    - In the `.env` file add your `NEWS_API_KEY` value (do NOT commit this file to source control):
-
-    ```bash
-    NEWS_API_KEY=your_newsdata_api_key_here
-    ```
-
 ### 5. Run the Server
 Run in root folder
 Start the backend server using Uvicorn. The `--reload` flag will automatically restart the server on code changes.
