@@ -97,8 +97,8 @@ def scheduler():
 threading.Thread(target=scheduler, daemon=True).start()
 
 # --- API Endpoints ---
-app.include_router(predictions.router)
-app.include_router(community.router)
+app.include_router(predictions.router, prefix="/api/v1")
+app.include_router(community.router, prefix="/api/v1")
 app.include_router(news.router, prefix="/api/v1")
 
 @app.get("/api/v1/dam-openings", response_model=List[schemas.DamOpening])

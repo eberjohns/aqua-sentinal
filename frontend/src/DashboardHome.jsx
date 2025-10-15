@@ -107,7 +107,8 @@ function DashboardHome() {
       else if (risk === 'MEDIUM') risk = 'Medium';
       else if (risk === 'LOW') risk = 'Low';
       setFloodChance(risk);
-    } catch {
+    } catch (err) {
+      console.error('Error fetching flood chance:', err);
       setFloodChance('Error');
     }
     setLoadingFlood(false);
