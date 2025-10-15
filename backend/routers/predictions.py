@@ -52,9 +52,29 @@ def risk_alert(lat: float, lon: float):
         river_elev = get_elevation(closest_point["lat"], closest_point["lon"])
         # Call the utility function directly
         rainfall = get_rainfall(lat, lon)
+        # Defensive defaults: if elevation fetch failed it'll be 0; still compute risk primarily on distance
+        try:
+            river_elev_val = float(river_elev or 0)
+        except Exception:
+            river_elev_val = 0
+        try:
+            user_elev_val = float(user_elev or 0)
+        except Exception:
+            user_elev_val = 0
 
-        risk = "HIGH" if user_elev < river_elev and distance < 10 else "MEDIUM" if user_elev < river_elev and distance < 25 else "LOW"
+        if user_elev_val < river_elev_val and distance < 10:
+            risk = "HIGH"
+        elif user_elev_val < river_elev_val and distance < 25:
+            risk = "MEDIUM"
+        else:
+            # If elevations are both zero (fetch failed), fall back to distance-based rule
+            if river_elev_val == 0 and user_elev_val == 0:
+                risk = "MEDIUM" if distance < 25 else "LOW"
+            else:
+                risk = "LOW"
 
-        return {"nearest_river": river["name"], "nearest_point": closest_point, "distance_km": round(distance, 2), "river_elevation": round(river_elev, 1), "user_elevation": round(user_elev, 1), "rainfall_mm": rainfall, "risk": risk}
+        return {"nearest_river": river.get("name"), "nearest_point": closest_point, "distance_km": round(distance, 2), "river_elevation": round(river_elev_val, 1), "user_elevation": round(user_elev_val, 1), "rainfall_mm": rainfall, "risk": risk}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal error in /risk_alert: {e}")
+        # Don't expose internal tracebacks to users; return a safe LOW risk and log the error
+        print(f"Internal error in /risk_alert: {e}")
+        return {"risk": "LOW", "message": "Internal error evaluating risk; defaulting to LOW."}

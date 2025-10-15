@@ -3,6 +3,9 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// API base (use Vite env var or fallback)
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://127.0.0.1:8000';
+
 function MiniMap({ location, reports }) {
   if (!location) return <div>Loading map...</div>;
   return (
@@ -27,32 +30,58 @@ function DashboardHome() {
   const [loadingFlood, setLoadingFlood] = useState(false);
   const [error, setError] = useState(null);
 
+  // API base (use Vite env var or fallback)
+  const API_BASE = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://127.0.0.1:8000';
+
   // Fetch user location
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => setLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
       () => setError('Location permission denied or unavailable.')
     );
-  }, []);
+  }, [API_BASE]);
 
-  // Fetch news
+  // Fetch news from backend (backend proxies NewsData using NEWS_API_KEY)
   useEffect(() => {
-    fetch('https://newsdata.io/api/1/news?apikey=pub_8e5c79aa6fed4de6bb63588483f7bcd3&q=floods&language=en')
-      .then(res => res.json())
-      .then(data => setNews(data.results || []));
-  }, []);
+    let mounted = true;
+    fetch(`${API_BASE}/api/v1/news?q=floods&language=en`)
+      .then(res => {
+        if (!res.ok) throw new Error(`News fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (!mounted) return;
+        // backend returns { results: [...] } like the original API
+        setNews(data.results || []);
+        setError(null);
+      })
+      .catch(err => {
+        console.error('Error fetching news from backend:', err);
+        if (mounted) {
+          setNews([]);
+          setError('Unable to load news at this time.');
+        }
+      });
+    return () => { mounted = false; };
+  }, [API_BASE]);
 
   // Fetch dam openings
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/v1/dam-openings')
-      .then(res => res.json())
-      .then(data => setDamOpenings(data || []));
+    let mounted = true;
+    fetch(`${API_BASE}/api/v1/dam-openings`)
+      .then(res => {
+        if (!res.ok) throw new Error(`Dam openings fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => { if (mounted) setDamOpenings(data || []); })
+      .catch(err => { console.error('Error fetching dam openings:', err); if (mounted) setDamOpenings([]); });
+    return () => { mounted = false; };
   }, []);
 
   // Fetch nearby reports
   useEffect(() => {
     if (!location) return;
-    axios.get('http://127.0.0.1:8000/api/v1/reports')
+    axios.get(`${API_BASE}/api/v1/reports`)
       .then(res => {
         // Filter reports within ~10km
         const filtered = res.data.filter(r => {
@@ -62,7 +91,7 @@ function DashboardHome() {
         });
         setReports(filtered);
       });
-  }, [location]);
+  }, [location, API_BASE]);
 
   // Flood chance check (fixed endpoint and risk mapping)
   const checkFloodChance = async () => {
@@ -70,8 +99,9 @@ function DashboardHome() {
     setLoadingFlood(true);
     setFloodChance(null);
     try {
-  const res = await axios.get(`http://127.0.0.1:8000/risk_alert?lat=${location.lat}&lon=${location.lon}`);
+      const res = await axios.get(`${API_BASE}/api/v1/risk_alert?lat=${location.lat}&lon=${location.lon}`);
       // Map backend risk to UI string
+      if (!res || !res.data) throw new Error('Empty response from risk_alert');
       let risk = res.data.risk || 'Error';
       if (risk === 'HIGH') risk = 'High';
       else if (risk === 'MEDIUM') risk = 'Medium';
@@ -165,13 +195,26 @@ function DashboardHome() {
           <h2 style={{ color: '#1976d2', marginBottom: 16, letterSpacing: 1 }}>💧 Dam Openings</h2>
           <div style={{ maxHeight: 180, overflowY: 'auto' }}>
             {damOpenings.length === 0 && <div style={{ color: '#888' }}>No dam openings scheduled.</div>}
-            {damOpenings.map((d, i) => (
-              <div key={i} style={{ marginBottom: 16, background: 'linear-gradient(90deg, #e3f2fd 60%, #f8fafc 100%)', borderRadius: 10, padding: 12, boxShadow: '0 1px 4px #0001' }}>
-                <b style={{ fontSize: 15 }}>{d.name}</b><br />
-                <span style={{ color: '#1976d2', fontSize: 13 }}>Lat: {d.latitude}, Lng: {d.longitude}</span><br />
-                <span style={{ color: '#555', fontSize: 13 }}>Opens at: {new Date(d.time).toLocaleString()}</span>
-              </div>
-            ))}
+            {damOpenings.map((d, i) => {
+              // backend returns `opening_time`; older clients may send `time` — accept both
+              const dateStr = d.opening_time ?? d.time;
+              let displayDate = 'Unknown';
+              if (dateStr) {
+                try {
+                  const dt = new Date(dateStr);
+                  displayDate = isNaN(dt.getTime()) ? 'Unknown' : dt.toLocaleString();
+                } catch {
+                  displayDate = 'Unknown';
+                }
+              }
+              return (
+                <div key={i} style={{ marginBottom: 16, background: 'linear-gradient(90deg, #e3f2fd 60%, #f8fafc 100%)', borderRadius: 10, padding: 12, boxShadow: '0 1px 4px #0001' }}>
+                  <b style={{ fontSize: 15 }}>{d.name}</b><br />
+                  <span style={{ color: '#1976d2', fontSize: 13 }}>Lat: {d.latitude}, Lng: {d.longitude}</span><br />
+                  <span style={{ color: '#555', fontSize: 13 }}>Opens at: {displayDate}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
