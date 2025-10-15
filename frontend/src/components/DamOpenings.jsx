@@ -38,7 +38,8 @@ function DamOpenings() {
       name: form.name,
       latitude: parseFloat(form.latitude),
       longitude: parseFloat(form.longitude),
-      time: form.time
+      // convert datetime-local value to an ISO string (backend expects a datetime)
+      time: new Date(form.time).toISOString()
     };
     try {
       const res = await fetch(API_URL, {
@@ -48,12 +49,14 @@ function DamOpenings() {
       });
       if (res.ok) {
         // Refresh list after successful add
-        const updated = await res.json();
-        setOpenings(updated);
+        const created = await res.json();
+        // append the created opening to current list
+        setOpenings(prev => [...prev, created]);
         setForm({ name: '', latitude: '', longitude: '', time: '' });
       }
     } catch (err) {
-      // Optionally show error
+      // log error for visibility
+      console.error('Failed to add dam opening', err);
     }
   };
 
@@ -64,13 +67,17 @@ function DamOpenings() {
         <h2 style={{ color: '#1976d2' }}>Upcoming Dam Shutter Openings</h2>
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {openings.length === 0 && <li style={{ color: '#888' }}>No dam openings scheduled.</li>}
-          {openings.map((d, i) => (
-            <li key={i} style={{ margin: '18px 0', padding: '12px 16px', background: '#e3f2fd', borderRadius: 8 }}>
-              <b>{d.name}</b><br />
-              <span style={{ color: '#1976d2' }}>Lat: {d.latitude}, Lng: {d.longitude}</span><br />
-              <span style={{ color: '#555' }}>Opens at: {new Date(d.time).toLocaleString()}</span>
-            </li>
-          ))}
+          {openings.map((d, i) => {
+            // backend returns `opening_time`; older clients may send `time` — accept both
+            const dateStr = d.opening_time ?? d.time;
+            return (
+              <li key={i} style={{ margin: '18px 0', padding: '12px 16px', background: '#e3f2fd', borderRadius: 8 }}>
+                <b>{d.name}</b><br />
+                <span style={{ color: '#1976d2' }}>Lat: {d.latitude}, Lng: {d.longitude}</span><br />
+                <span style={{ color: '#555' }}>Opens at: {new Date(dateStr).toLocaleString()}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
       {!isAdmin && (

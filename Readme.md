@@ -60,6 +60,14 @@ The application uses a `.env` file for configuration.
     ```
 2.  Open the newly created `.env` file and set the `DATABASE_URL` to your PostgreSQL connection string. The database requires the **PostGIS** extension to be enabled for geospatial features.
 
+3.  Add News API key
+
+    - In the `.env` file add your `NEWS_API_KEY` value (do NOT commit this file to source control):
+
+    ```bash
+    NEWS_API_KEY=your_newsdata_api_key_here
+    ```
+
 ### 5. Run the Server
 Run in root folder
 Start the backend server using Uvicorn. The `--reload` flag will automatically restart the server on code changes.
@@ -94,3 +102,7 @@ To check working of supabase:
 ```
 ipconfig /flushdns
 ```
+
+admin credentials for dam scheduling:
+- *username* : admin
+- *password* : admin123

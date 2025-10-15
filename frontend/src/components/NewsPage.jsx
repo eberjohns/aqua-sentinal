@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-const apiKey = "pub_8e5c79aa6fed4de6bb63588483f7bcd3";
-const apiUrl = `https://newsdata.io/api/1/news?apikey=${apiKey}&q=floods&language=en`;
+// Backend base (set VITE_API_BASE in frontend environment if needed), default to local backend
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ? import.meta.env.VITE_API_BASE : 'http://127.0.0.1:8000';
+const apiUrl = `${API_BASE}/api/v1/news?q=floods&language=en`;
 
 const fallbackImage = 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80';
 

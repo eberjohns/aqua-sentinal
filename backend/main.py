@@ -13,9 +13,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../notification'))
 from .notification_function import send_email_notification
 
 from . import models, schemas
+from fastapi import HTTPException
+from dateutil import parser as date_parser
+import pytz
 from .database import engine, Base, SessionLocal, get_db
 from .config import RECIPIENTS_CSV
-from .routers import predictions, community
+from .routers import predictions, community, news
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -96,6 +99,7 @@ threading.Thread(target=scheduler, daemon=True).start()
 # --- API Endpoints ---
 app.include_router(predictions.router)
 app.include_router(community.router)
+app.include_router(news.router, prefix="/api/v1")
 
 @app.get("/api/v1/dam-openings", response_model=List[schemas.DamOpening])
 def get_dam_openings(db: Session = Depends(get_db)):
@@ -105,11 +109,31 @@ def get_dam_openings(db: Session = Depends(get_db)):
 
 @app.post("/api/v1/dam-openings", response_model=schemas.DamOpening, status_code=201)
 def add_dam_opening(opening: schemas.DamOpeningCreate, db: Session = Depends(get_db)):
+    # Accept either `time` (from create payload) or `opening_time` if provided
+    raw_time = getattr(opening, 'time', None)
+    if raw_time is None:
+        # try to read opening_time if present in incoming JSON
+        # pydantic model DamOpeningCreate defines `time`, so this is a defensive check
+        raise HTTPException(status_code=400, detail="Missing time field for dam opening")
+
+    # Ensure we have a timezone-aware datetime in UTC
+    try:
+        if isinstance(raw_time, str):
+            dt = date_parser.isoparse(raw_time)
+        else:
+            dt = raw_time
+        if dt.tzinfo is None:
+            # assume local naive times are UTC
+            dt = dt.replace(tzinfo=timezone.utc)
+        dt_utc = dt.astimezone(pytz.UTC)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid time format: {e}")
+
     new_opening = models.DamOpening(
         name=opening.name,
         latitude=opening.latitude,
         longitude=opening.longitude,
-        opening_time=opening.time
+        opening_time=dt_utc
     )
     db.add(new_opening)
     db.commit()
